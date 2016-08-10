@@ -2,6 +2,10 @@
 
 Login with Google and download your Pokemons' detail info.
 
+## Download
+
+ * [poke-go-client-java-0.1.0](https://github.com/ronald8192/poke-go-client-java/releases/download/0.1.0/poke-go-client-java-0.1.0.jar)
+
 ## System requirments
 
  * Java 8
