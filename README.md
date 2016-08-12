@@ -1,10 +1,14 @@
-# Poke Go Details
+# Poké Go Details
 
-Login with Google and download your Pokemons' detail info.
+Login with Google and download your Pokémons' detail info.
 
 ## Download
 
- * [poke-go-client-java-0.1.0](https://github.com/ronald8192/poke-go-client-java/releases/download/0.1.0/poke-go-client-java-0.1.0.jar)
+ * [poke-go-client-java-1.0.0](https://github.com/ronald8192/poke-go-client-java/releases/download/1.0.0/poke-go-client-java-1.0.0-jar-with-dependencies.jar)
+
+## What is this for?
+
+  [pokemon-go-detail-visualizer](https://ronald8192.github.io/pokemon-go-detail-visualizer/)
 
 ## System requirments
 
@@ -16,7 +20,7 @@ Login with Google and download your Pokemons' detail info.
  1. Login to Google. (this page will not show if you already did)
  1. Click `Allow`.
  1. Copy the token and paste it into the program.
- 1. Click `Download`. Your Pokemon data will save to `myPokemon.json`.
+ 1. Click `Download`. Your Pokémon data will save to `myPokemon.json`.
 
 ## Source Code 
 
