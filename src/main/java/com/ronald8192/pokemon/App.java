@@ -128,7 +128,7 @@ public class App extends JFrame {
 				if (err != null) {
 					JOptionPane.showMessageDialog(mainPanel, err.say());
 				}
-				btnDownload.setText("Download");
+				btnDownload.setText("Update");
 				new Thread(() -> {
 					try {
 						Thread.sleep(3000L);

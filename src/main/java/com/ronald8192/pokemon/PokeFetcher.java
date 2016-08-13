@@ -39,6 +39,8 @@ public class PokeFetcher {
 	private boolean loggedIn = false;
 	private PokemonGo pokemonGo;
 
+	private String refreshToken = "";
+
 	public String getLoginToken() {
 		try {
 			provider = new GoogleUserCredentialProvider(httpClient);
@@ -47,33 +49,38 @@ public class PokeFetcher {
 		} catch (RemoteServerException e) {
 			e.printStackTrace();
 		}
-		// in this url, you will get a code for the google account that is
-		// logged
 		log.info("Please go to " + GoogleUserCredentialProvider.LOGIN_URL);
 		return GoogleUserCredentialProvider.LOGIN_URL;
 	}
 
 	public void login(String access) throws Exception {
-		// we should be able to login with this token
 		try {
 			provider.login(access);
-			pokemonGo = new PokemonGo(provider, httpClient);
+			refreshToken = provider.getRefreshToken();  //refresh token for next auth
 		} catch (Exception e) {
 			loggedIn = false;
 			throw e;
 		}
-		
 		loggedIn = true;
 		
 	}
 
 	public EDownloadStatus download()  {
+		try {
+			if(provider.isTokenIdExpired()){
+				pokemonGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient, refreshToken), httpClient);
+			}else{
+				pokemonGo = new PokemonGo(provider, httpClient);
+			}
+		} catch (LoginFailedException | RemoteServerException e) {
+			log.error(e.getMessage());
+			return EDownloadStatus.AUTH_ERROR;
+		}
 		// After this you can access the api from the PokemonGo instance :
 		try {
-			// PokeBank pokeBank = go.getInventories().getPokebank();
 
-			// to get all his inventories (Pokemon, backpack, egg,
-			// incubator)
+			// PokeBank pokeBank = go.getInventories().getPokebank();
+			// to get all his inventories (Pokemon, backpack, egg, incubator)
 			
 			JSONObject pokeDetails = new JSONObject();
 			
