@@ -37,6 +37,7 @@ public class App extends JFrame {
 		Runtime.getRuntime().addShutdownHook(new Thread("shutdown") {
 			@Override
 			public void run() {
+				log.trace("shutting down...");
 				poke = null;
 				System.gc();
 			}
@@ -128,7 +129,7 @@ public class App extends JFrame {
 					@Override
 					public void run() {
 						String token = txtAuthToken.getText();
-						DownloadError err = null;
+						EDownloadStatus err = null;
 						if (poke.isLoggedIn()) {
 							err = poke.download();
 						} else {
@@ -140,7 +141,7 @@ public class App extends JFrame {
 									err = poke.download();
 								} catch (Exception er) {
 									log.error(er.getMessage());
-									err = DownloadError.AUTH_ERROR;
+									err = EDownloadStatus.AUTH_ERROR;
 								}
 								
 							}

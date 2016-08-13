@@ -67,7 +67,7 @@ public class PokeFetcher {
 		
 	}
 
-	public DownloadError download()  {
+	public EDownloadStatus download()  {
 		// After this you can access the api from the PokemonGo instance :
 		try {
 			// PokeBank pokeBank = go.getInventories().getPokebank();
@@ -137,7 +137,7 @@ public class PokeFetcher {
 			if (hasError) {
 				log.error("Save file error.");
 				log.info(myPokemons.toString());
-				return DownloadError.SAVE_TO_DISK_ERROR;
+				return EDownloadStatus.SAVE_TO_DISK_ERROR;
 			} else {
 				log.info("Your Pokemon data has saved to 'myPokemon.json', please copy the content to https://ronald8192.github.io/pokemon-go-detail-visualizer/");
 			}
@@ -152,12 +152,12 @@ public class PokeFetcher {
 
 		} catch (RemoteServerException | NullPointerException e) {
 			log.error(e.getMessage());
-			return DownloadError.NETOWRK_ERROR;
+			return EDownloadStatus.NETOWRK_ERROR;
 		}catch (LoginFailedException e){
 			log.error(e.getMessage());
-			return DownloadError.AUTH_ERROR;
+			return EDownloadStatus.AUTH_ERROR;
 		}
-		return DownloadError.NO_ERROR;
+		return EDownloadStatus.SUCCESS;
 	}
 
 	public boolean isLoggedIn(){
