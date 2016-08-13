@@ -26,13 +26,9 @@ public class App extends JFrame {
 	private static String googleAuthUrl = "";
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
-
-			@Override
-			public void run() {
-				poke = new PokeFetcher();
-				new App().createView().initListeners().setVisible(true);
-			}
+		SwingUtilities.invokeLater(() -> {
+			poke = new PokeFetcher();
+			new App().createView().initListeners().setVisible(true);
 		});
 		Runtime.getRuntime().addShutdownHook(new Thread("shutdown") {
 			@Override
@@ -96,76 +92,53 @@ public class App extends JFrame {
 	}
 
 	private App initListeners() {
-		btnOpenAuth.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-//				log.debug(googleAuthUrl);
-				
-				btnOpenAuth.setEnabled(false);
-				btnOpenAuth.setText("Getting Google OAuth link...");
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						googleAuthUrl = poke.getLoginToken();
-						openWebPage(googleAuthUrl);
-						btnOpenAuth.setEnabled(true);
-						btnOpenAuth.setText("Auth with Google");
-					}
-				}).start();
-				
-				
-			}
+		btnOpenAuth.addActionListener((e) -> {
+			btnOpenAuth.setEnabled(false);
+			btnOpenAuth.setText("Getting Google OAuth link...");
+			new Thread(() -> {
+				googleAuthUrl = poke.getLoginToken();
+				openWebPage(googleAuthUrl);
+				btnOpenAuth.setEnabled(true);
+				btnOpenAuth.setText("Auth with Google");
+			}).start();
 		});
 
-		btnDownload.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				btnDownload.setEnabled(false);
-				btnDownload.setText("Downloading...");
+		btnDownload.addActionListener((e) -> {
+			btnDownload.setEnabled(false);
+			btnDownload.setText("Downloading...");
 
-				new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						String token = txtAuthToken.getText();
-						EDownloadStatus err = null;
-						if (poke.isLoggedIn()) {
+			new Thread(() -> {
+				String token = txtAuthToken.getText();
+				EDownloadStatus err = null;
+				if (poke.isLoggedIn()) {
+					err = poke.download();
+				} else {
+					if (token.trim().equals("")) {
+						JOptionPane.showMessageDialog(mainPanel, "Please authenticate with Google first.");
+					} else {
+						try {
+							poke.login(token);
 							err = poke.download();
-						} else {
-							if (token.trim().equals("")) {
-								JOptionPane.showMessageDialog(mainPanel, "Please authenticate with Google first.");
-							} else {
-								try {
-									poke.login(token);
-									err = poke.download();
-								} catch (Exception er) {
-									log.error(er.getMessage());
-									err = EDownloadStatus.AUTH_ERROR;
-								}
-								
-							}
+						} catch (Exception er) {
+							log.error(er.getMessage());
+							err = EDownloadStatus.AUTH_ERROR;
 						}
-						if(err != null){
-							JOptionPane.showMessageDialog(mainPanel, err.say());
-						}
-						btnDownload.setText("Download");
-						new Thread(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									Thread.sleep(3000L);
-								} catch (InterruptedException e) {
-								}finally{
-									btnDownload.setEnabled(true);
-								}
-							}
-						}).start();
-						
+					}
+				}
+				if (err != null) {
+					JOptionPane.showMessageDialog(mainPanel, err.say());
+				}
+				btnDownload.setText("Download");
+				new Thread(() -> {
+					try {
+						Thread.sleep(3000L);
+					} catch (InterruptedException ie) {
+					} finally {
+						btnDownload.setEnabled(true);
 					}
 				}).start();
+			}).start();
 
-			}
 		});
 
 		return this;

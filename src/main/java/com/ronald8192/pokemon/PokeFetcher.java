@@ -196,8 +196,7 @@ public class PokeFetcher {
 		}
 			
 		//Path of the jar	
-	    return new File(jarPath).getParentFile().getPath(); 
-	    
+	    return new File(jarPath).getParentFile().getPath();
 	}
 
 }
