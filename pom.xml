@@ -14,8 +14,6 @@
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
 					<archive>
 						<manifest>
 							<mainClass>com.ronald8192.pokemon.App</mainClass>
@@ -66,5 +64,5 @@
 			<version>0.4.0</version>
 		</dependency>
 	</dependencies>
-	<version>1.0.0</version>
+	<version>1.1.0</version>
 </project>
