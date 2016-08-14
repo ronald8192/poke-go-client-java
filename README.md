@@ -4,7 +4,7 @@ Login with Google and download your Pokémons' detail info.
 
 ## Download
 
- * [poke-go-client-java-1.1.0](https://github.com/ronald8192/poke-go-client-java/releases/download/1.1.0/poke-go-client-java-1.1.0-jar-with-dependencies.jar)
+ * [poke-go-client-java](https://github.com/ronald8192/poke-go-client-java/releases)
 
 ## What is this for?
 
