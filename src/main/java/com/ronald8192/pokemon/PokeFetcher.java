@@ -48,7 +48,6 @@ public class PokeFetcher {
 			loggedIn = true;
 			provider = new GoogleUserCredentialProvider(httpClient, refreshToken);
 		}
-		log.trace("logged in:" + isLoggedIn());
 	}
 
 	/**
@@ -145,12 +144,7 @@ public class PokeFetcher {
 	}
 
 	private void apiInit() throws LoginFailedException, RemoteServerException {
-		log.trace("provider.isTokenIdExpired(): " + provider.isTokenIdExpired());
-//		if(provider.isTokenIdExpired() || pokemonGo == null){
-//			pokemonGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient, refreshToken), httpClient);
-//		}else{
-			pokemonGo = new PokemonGo(provider, httpClient);
-//		}
+		pokemonGo = new PokemonGo(provider, httpClient);
 	}
 
 	public EDownloadStatus download()  {

@@ -116,7 +116,6 @@ public class App extends JFrame {
 		btnAuth.addActionListener((e) -> {
 			btnAuth.setEnabled(false);
 			if (poke.isLoggedIn()) {
-				log.trace("sign off");
 				poke.logout();
 				btnAuth.setText("Auth with Google");
 				btnAuth.setEnabled(true);
@@ -146,7 +145,6 @@ public class App extends JFrame {
 			new Thread(() -> {
 				String token = txtAuthToken.getText();
 				EDownloadStatus err = null;
-				log.trace("logged in:" + poke.isLoggedIn());
 				if (poke.isLoggedIn()) {
 					//logged in
 					btnDownload.setText("Downloading...");
