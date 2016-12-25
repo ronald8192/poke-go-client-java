@@ -6,6 +6,7 @@ import java.net.URLDecoder;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import com.pokegoapi.exceptions.CaptchaActiveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,7 +43,7 @@ public class PokeFetcher {
 	private String configDir = System.getProperty("user.home") + File.separator + ".poke-go-client" + File.separator;
 	private String diskRefreshTokenName =  "config.json";
 
-	public PokeFetcher() throws LoginFailedException, RemoteServerException {
+	public PokeFetcher() throws LoginFailedException, RemoteServerException, CaptchaActiveException {
 		refreshToken = getRefreshTokenFromDisk();
 		if(refreshToken != null){
 			loggedIn = true;
@@ -57,7 +58,7 @@ public class PokeFetcher {
 	 * @throws LoginFailedException
 	 * @throws RemoteServerException
      */
-	public String getLoginToken() throws LoginFailedException, RemoteServerException {
+	public String getLoginToken() throws LoginFailedException, RemoteServerException, CaptchaActiveException {
 		provider = new GoogleUserCredentialProvider(httpClient);
 		log.info("Please go to " + GoogleUserCredentialProvider.LOGIN_URL);
 		return GoogleUserCredentialProvider.LOGIN_URL;
@@ -68,7 +69,7 @@ public class PokeFetcher {
 	 * @param access
 	 * @throws Exception
      */
-	public void login(String access) throws LoginFailedException, RemoteServerException {
+	public void login(String access) throws LoginFailedException, RemoteServerException, CaptchaActiveException {
 		try {
 			provider.login(access);
 			refreshToken = provider.getRefreshToken();  //refresh token for next auth
@@ -79,7 +80,7 @@ public class PokeFetcher {
 				log.error(e.getMessage());
 			}
 			saveRefreshTokenToDisk();
-		} catch (LoginFailedException | RemoteServerException e) {
+		} catch (LoginFailedException | RemoteServerException | CaptchaActiveException e) {
 			loggedIn = false;
 			throw e;
 		}
@@ -144,12 +145,13 @@ public class PokeFetcher {
 		}
 	}
 
-	private void apiInit() throws LoginFailedException, RemoteServerException {
+	private void apiInit() throws LoginFailedException, RemoteServerException, CaptchaActiveException {
 		log.trace("provider.isTokenIdExpired(): " + provider.isTokenIdExpired());
 //		if(provider.isTokenIdExpired() || pokemonGo == null){
 //			pokemonGo = new PokemonGo(new GoogleUserCredentialProvider(httpClient, refreshToken), httpClient);
 //		}else{
-			pokemonGo = new PokemonGo(provider, httpClient);
+			pokemonGo = new PokemonGo(httpClient);
+			pokemonGo.login(provider);
 //		}
 	}
 
@@ -158,9 +160,11 @@ public class PokeFetcher {
 			apiInit();
 		}catch(LoginFailedException | RemoteServerException e){
 			return AUTH_ERROR;
+		} catch (CaptchaActiveException e) {
+			e.printStackTrace();
 		}
 		// After this you can access the api from the PokemonGo instance :
-		try {
+//		try {
 
 			// PokeBank pokeBank = go.getInventories().getPokebank();
 			// to get all his inventories (Pokemon, backpack, egg, incubator)
@@ -174,35 +178,40 @@ public class PokeFetcher {
 			List<Pokemon> pokemons = pokemonGo.getInventories().getPokebank().getPokemons();
 			JSONArray myPokemons = new JSONArray();
 			for (Pokemon pokemon : pokemons) {
-				JSONObject p = new JSONObject();
-				p.put("poke_id", pokemon.getMeta().getNumber());
-				p.put("nickname", (pokemon.getNickname()));
-				p.put("lv", pokemon.getLevel());
-				p.put("cp", pokemon.getCp());
-				p.put("move_1", humanize(pokemon.getMove1().toString()));
-				p.put("move_2", humanize(pokemon.getMove2().toString()));
-				p.put("iv", Double.parseDouble(dfPercent.format(pokemon.getIvRatio())));
-				p.put("iv_a", pokemon.getIndividualAttack());
-				p.put("iv_d", pokemon.getIndividualDefense());
-				p.put("iv_s", pokemon.getIndividualStamina());
-				p.put("height", Double.parseDouble(df.format(pokemon.getHeightM())));
-				p.put("weight", Double.parseDouble(df.format(pokemon.getWeightKg())));
-				p.put("fav", pokemon.isFavorite());
-				p.put("created_at", pokemon.getCreationTimeMs());
 				try {
-					p.put("max_cp",pokemon.getMaxCp());
-				} catch (JSONException | NoSuchItemException e1) {
-					p.put("max_cp","");
-					e1.printStackTrace();
+					JSONObject p = new JSONObject();
+					p.put("poke_id", pokemon.getMeta().getNumber());
+					p.put("nickname", pokemon.getNickname());
+					p.put("lv", pokemon.getLevel());
+					p.put("cp", pokemon.getCp());
+					p.put("move_1", humanize(pokemon.getMove1().toString()));
+					p.put("move_2", humanize(pokemon.getMove2().toString()));
+					p.put("iv", Double.parseDouble(dfPercent.format(pokemon.getIvRatio())));
+					p.put("iv_a", pokemon.getIndividualAttack());
+					p.put("iv_d", pokemon.getIndividualDefense());
+					p.put("iv_s", pokemon.getIndividualStamina());
+					p.put("height", Double.parseDouble(df.format(pokemon.getHeightM())));
+					p.put("weight", Double.parseDouble(df.format(pokemon.getWeightKg())));
+					p.put("fav", pokemon.isFavorite());
+					p.put("created_at", pokemon.getCreationTimeMs());
+					try {
+						p.put("max_cp",pokemon.getMaxCp());
+					} catch (JSONException | NoSuchItemException e1) {
+						p.put("max_cp","");
+						e1.printStackTrace();
+					}
+					try {
+						p.put("max_cp_fp", pokemon.getMaxCpForPlayer());
+					} catch (JSONException | NoSuchItemException e) {
+						p.put("max_cp_fp", "");
+						e.printStackTrace();
+					}
+					p.put("max_cp_fepufp",pokemon.getMaxCpFullEvolveAndPowerupForPlayer(pokemon.getPokemonId()));
+					myPokemons.put(p);
+				}catch(NullPointerException e){
+					log.warn("Skipping " + pokemon.getNickname());
 				}
-				try {
-					p.put("max_cp_fp", pokemon.getMaxCpForPlayer());
-				} catch (JSONException | NoSuchItemException e) {
-					p.put("max_cp_fp", "");
-					e.printStackTrace();
-				}
-				p.put("max_cp_fepufp",pokemon.getMaxCpFullEvolveAndPowerupForPlayer());
-				myPokemons.put(p);
+
 			}
 			pokeDetails.put("pokemons", myPokemons);
 
@@ -223,17 +232,17 @@ public class PokeFetcher {
 			// System.out.println(c.name() + " : " + currencies.get(o));
 			// }
 
-		} catch (RemoteServerException | NullPointerException e) {
-			log.error(e.getMessage());
-			return NETOWRK_ERROR;
-		}catch (LoginFailedException e){
-			log.error(e.getMessage());
-			return AUTH_ERROR;
-		}
+//		} catch (RemoteServerException | NullPointerException e) {
+//			log.error(e.getMessage());
+//			return NETOWRK_ERROR;
+//		}catch (LoginFailedException e){
+//			log.error(e.getMessage());
+//			return AUTH_ERROR;
+//		}
 		return SUCCESS;
 	}
 
-	public String getPlayerName() throws LoginFailedException, RemoteServerException {
+	public String getPlayerName() throws LoginFailedException, RemoteServerException, CaptchaActiveException {
 		apiInit();
 		if(playerName == null){
 			PlayerProfile playerProfile= pokemonGo.getPlayerProfile();

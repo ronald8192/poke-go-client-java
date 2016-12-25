@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import com.pokegoapi.exceptions.CaptchaActiveException;
 import com.pokegoapi.exceptions.LoginFailedException;
 import com.pokegoapi.exceptions.RemoteServerException;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ public class App extends JFrame {
 			} catch (LoginFailedException e) {
 				e.printStackTrace();
 			} catch (RemoteServerException e) {
+				e.printStackTrace();
+			} catch (CaptchaActiveException e) {
 				e.printStackTrace();
 			}
 			new App().createView().initListeners().setVisible(true);
@@ -74,7 +77,7 @@ public class App extends JFrame {
 			String playerName = null;
 			try {
 				playerName = poke.getPlayerName();
-			} catch (LoginFailedException | RemoteServerException e) {
+			} catch (LoginFailedException | RemoteServerException | CaptchaActiveException e) {
 				e.printStackTrace();
 			}
 			btnAuth.setText("Sign off " + ( playerName == null ? "" : ("(Signed in as " + playerName + ")")));
@@ -130,6 +133,8 @@ public class App extends JFrame {
 						e1.printStackTrace();
 					} catch (RemoteServerException e1) {
 						e1.printStackTrace();
+					} catch (CaptchaActiveException e1) {
+						e1.printStackTrace();
 					}
 					openWebPage(googleAuthUrl);
 					btnAuth.setEnabled(true);
@@ -168,6 +173,7 @@ public class App extends JFrame {
 						btnDownload.setText("Update");
 					} catch (Exception er) {
 						log.error(er.getMessage());
+						er.printStackTrace();
 						err = EDownloadStatus.AUTH_ERROR;
 						btnDownload.setText("Download");
 					}
@@ -191,6 +197,8 @@ public class App extends JFrame {
 					try {
 						playerName = poke.getPlayerName();
 					} catch (LoginFailedException | RemoteServerException e1) {
+						e1.printStackTrace();
+					} catch (CaptchaActiveException e1) {
 						e1.printStackTrace();
 					}
 					btnAuth.setText("Sign off " + ( playerName == null ? "" : ("(Signed in as " + playerName + ")")));
