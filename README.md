@@ -22,10 +22,6 @@ Login with Google and download your Pokémons' detail info.
  1. Copy the token and paste it into the program.
  1. Click `Download`. Your Pokémon data will save to `myPokemon.json`.
 
-## Source Code 
-
- * Release later
-
 ## API
 
  * Unofficial API [PokeGOAPI-Java](https://github.com/Grover-c13/PokeGOAPI-Java).
